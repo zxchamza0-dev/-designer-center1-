@@ -26,7 +26,10 @@ def inject_globals():
         'date': date,
         'datetime': datetime
     }
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///designer_center.db'
+# استخدام مسار مطلق لقاعدة البيانات
+import os
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'designer_center.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
