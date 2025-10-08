@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}{{ client.full_name }} - ملف العميل{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- رأس ملف العميل -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+        <div class="flex items-start justify-between">
+            <div class="flex items-center">
+                <div class="bg-primary text-white rounded-full h-20 w-20 flex items-center justify-center text-3xl font-bold">
+                    {{ client.full_name[0] }}
+                </div>
+                <div class="mr-6">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ client.full_name }}</h1>
+                    <div class="flex items-center space-x-4 space-x-reverse text-sm text-gray-600">
+                        <span><i class="fas fa-envelope ml-2"></i>{{ client.email }}</span>
+                        {% if client.phone %}
+                            <span><i class="fas fa-phone ml-2"></i>{{ client.phone }}</span>
+                        {% endif %}
+                        <span><i class="fas fa-calendar ml-2"></i>انضم في {{ client.created_at.strftime('%d/%m/%Y') }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex space-x-3 space-x-reverse">
+                <button class="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors">
+                    <i class="fas fa-edit ml-2"></i>
+                    تعديل
+                </button>
+                <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                    <i class="fas fa-envelope ml-2"></i>
+                    إرسال رسالة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- إحصائيات العميل -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div class="flex items-center">
+                <div class="p-3 bg-blue-100 rounded-lg">
+                    <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
+                </div>
+                <div class="mr-4">
+                    <p class="text-sm font-medium text-gray-600">إجمالي المشاريع</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ client_stats.total_projects }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div class="flex items-center">
+                <div class="p-3 bg-green-100 rounded-lg">
+                    <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                </div>
+                <div class="mr-4">
+                    <p class="text-sm font-medium text-gray-600">مشاريع مكتملة</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ client_stats.completed_projects }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div class="flex items-center">
+                <div class="p-3 bg-purple-100 rounded-lg">
+                    <i class="fas fa-dollar-sign text-purple-600 text-xl"></i>
+                </div>
+                <div class="mr-4">
+                    <p class="text-sm font-medium text-gray-600">إجمالي المدفوعات</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ client_stats.total_paid|number_format }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div class="flex items-center">
+                <div class="p-3 bg-orange-100 rounded-lg">
+                    <i class="fas fa-hourglass-half text-orange-600 text-xl"></i>
+                </div>
+                <div class="mr-4">
+                    <p class="text-sm font-medium text-gray-600">مبالغ مستحقة</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ client_stats.pending_amount|number_format }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- مشاريع العميل -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="p-6 border-b border-gray-100">
+                <h2 class="text-xl font-semibold text-gray-900">مشاريع العميل</h2>
+            </div>
+            <div class="p-6">
+                {% if projects %}
+                    <div class="space-y-4">
+                        {% for project in projects %}
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-start justify-between mb-2">
+                                <h3 class="font-medium text-gray-900">{{ project.title }}</h3>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if project.status == 'طلب جديد' %}bg-blue-100 text-blue-800{% elif project.status == 'قيد التنفيذ' %}bg-orange-100 text-orange-800{% elif project.status == 'مكتمل' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ project.status }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-600">{{ project.created_at.strftime('%d/%m/%Y') }}</span>
+                                {% if project.budget %}
+                                    <span class="font-medium text-gray-900">{{ project.budget|number_format }} ريال</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-500 text-center py-8">لا توجد مشاريع لهذا العميل</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- فواتير العميل -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="p-6 border-b border-gray-100">
+                <h2 class="text-xl font-semibold text-gray-900">الفواتير</h2>
+            </div>
+            <div class="p-6">
+                {% if invoices %}
+                    <div class="space-y-4">
+                        {% for invoice in invoices %}
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-start justify-between mb-2">
+                                <div>
+                                    <h3 class="font-medium text-gray-900">فاتورة #{{ invoice.invoice_number }}</h3>
+                                    <p class="text-sm text-gray-600">{{ invoice.issue_date.strftime('%d/%m/%Y') }}</p>
+                                </div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if invoice.status == 'مدفوعة' %}bg-green-100 text-green-800{% elif invoice.status == 'مستحقة' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ invoice.status }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-600">المبلغ:</span>
+                                <span class="font-medium text-gray-900">{{ invoice.amount|number_format }} ريال</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-500 text-center py-8">لا توجد فواتير لهذا العميل</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

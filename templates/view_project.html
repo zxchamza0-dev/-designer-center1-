@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.title }} - لوحة تحكم المصمم{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- رأس المشروع -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+        <div class="flex items-start justify-between">
+            <div class="flex-1">
+                <div class="flex items-center mb-4">
+                    <h1 class="text-2xl font-bold text-gray-900 mr-4">{{ project.title }}</h1>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {% if project.status == 'طلب جديد' %}bg-blue-100 text-blue-800{% elif project.status == 'قيد التنفيذ' %}bg-orange-100 text-orange-800{% elif project.status == 'مكتمل' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                        {{ project.status }}
+                    </span>
+                </div>
+
+                <p class="text-gray-600 mb-4">{{ project.description }}</p>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    {% if project.budget %}
+                    <div>
+                        <span class="text-gray-500">الميزانية:</span>
+                        <span class="font-medium text-gray-900">{{ project.budget|number_format }} ريال</span>
+                    </div>
+                    {% endif %}
+                    {% if project.due_date %}
+                    <div>
+                        <span class="text-gray-500">تاريخ التسليم:</span>
+                        <span class="{% if project.due_date < date.today() %}text-red-600{% elif (project.due_date - date.today()).days <= 3 %}text-orange-600{% else %}text-gray-900{% endif %}">
+                            {{ project.due_date.strftime('%d/%m/%Y') }}
+                        </span>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <span class="text-gray-500">العميل:</span>
+                        <span class="font-medium text-gray-900">{{ project.client.full_name }}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">تاريخ الإنشاء:</span>
+                        <span class="font-medium text-gray-900">{{ project.created_at.strftime('%d/%m/%Y') }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex space-x-3 space-x-reverse">
+                {% if current_user.user_type == 'admin' %}
+                    <button onclick="showStatusModal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors">
+                        <i class="fas fa-edit ml-2"></i>
+                        تحديث الحالة
+                    </button>
+                {% endif %}
+                <a href="{{ url_for('upload_file', project_id=project.id) }}" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                    <i class="fas fa-upload ml-2"></i>
+                    رفع ملف
+                </a>
+            </div>
+        </div>
+
+        <!-- شريط التقدم -->
+        {% if project.status != 'طلب جديد' %}
+        <div class="mt-6">
+            <div class="flex justify-between text-sm text-gray-600 mb-2">
+                <span>تقدم المشروع</span>
+                <span>{{ project.progress }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div class="bg-primary h-3 rounded-full transition-all" style="width: {{ project.progress }}%"></div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- الملفات -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900">الملفات المرفوعة</h2>
+                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                    {{ files|length }}
+                </span>
+            </div>
+
+            {% if files %}
+                <div class="space-y-3">
+                    {% for file in files %}
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center flex-1">
+                            <i class="fas fa-file text-gray-400 ml-3"></i>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-900">{{ file.original_filename }}</p>
+                                <p class="text-xs text-gray-500">{{ file.file_size|filesizeformat }} • {{ file.uploaded_at.strftime('%d/%m') }}</p>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('download_file', file_id=file.id) }}"
+                           class="text-primary hover:text-primary-dark">
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500 text-center py-8">لا توجد ملفات مرفوعة بعد</p>
+            {% endif %}
+        </div>
+
+        <!-- المهام -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900">المهام</h2>
+                {% if current_user.user_type == 'admin' %}
+                    <a href="{{ url_for('add_task', project_id=project.id) }}" class="text-primary hover:text-primary-dark">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                {% endif %}
+            </div>
+
+            {% if tasks %}
+                <div class="space-y-3">
+                    {% for task in tasks %}
+                    <div class="p-3 border border-gray-200 rounded-lg">
+                        <div class="flex items-start justify-between mb-2">
+                            <h3 class="font-medium text-gray-900">{{ task.title }}</h3>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {% if task.status == 'معلق' %}bg-gray-100 text-gray-800{% elif task.status == 'قيد التنفيذ' %}bg-orange-100 text-orange-800{% else %}bg-green-100 text-green-800{% endif %}">
+                                {{ task.status }}
+                            </span>
+                        </div>
+                        {% if task.description %}
+                            <p class="text-sm text-gray-600 mb-2">{{ task.description }}</p>
+                        {% endif %}
+                        {% if task.due_date %}
+                            <p class="text-xs text-gray-500">تاريخ التسليم: {{ task.due_date.strftime('%d/%m/%Y') }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500 text-center py-8">لا توجد مهام محددة بعد</p>
+            {% endif %}
+        </div>
+
+        <!-- سجل الوقت -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900">سجل الوقت</h2>
+                {% if current_user.user_type == 'admin' %}
+                    <a href="{{ url_for('add_timelog', project_id=project.id) }}" class="text-primary hover:text-primary-dark">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                {% endif %}
+            </div>
+
+            {% if time_logs %}
+                <div class="space-y-3">
+                    {% for log in time_logs %}
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-medium text-gray-900">{{ log.description or 'عمل منجز' }}</h3>
+                            <span class="text-sm font-medium text-primary">{{ log.hours }} ساعة</span>
+                        </div>
+                        <p class="text-xs text-gray-500">{{ log.date.strftime('%d/%m/%Y') }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">إجمالي الساعات:</span>
+                        <span class="font-medium text-gray-900">{{ time_logs|sum(attribute='hours') }} ساعة</span>
+                    </div>
+                </div>
+            {% else %}
+                <p class="text-gray-500 text-center py-8">لا يوجد سجل وقت بعد</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- نافذة تحديث الحالة -->
+{% if current_user.user_type == 'admin' %}
+<div id="statusModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">تحديث حالة المشروع</h3>
+
+            <div class="space-y-3">
+                <button onclick="updateProjectStatus('طلب جديد')"
+                        class="w-full text-right p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
+                    <div class="flex items-center justify-between">
+                        <span class="text-blue-800">طلب جديد</span>
+                        <i class="fas fa-circle text-blue-500"></i>
+                    </div>
+                </button>
+
+                <button onclick="updateProjectStatus('قيد التنفيذ')"
+                        class="w-full text-right p-3 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors">
+                    <div class="flex items-center justify-between">
+                        <span class="text-orange-800">قيد التنفيذ</span>
+                        <i class="fas fa-circle text-orange-500"></i>
+                    </div>
+                </button>
+
+                <button onclick="updateProjectStatus('بانتظار المراجعة')"
+                        class="w-full text-right p-3 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
+                    <div class="flex items-center justify-between">
+                        <span class="text-red-800">بانتظار المراجعة</span>
+                        <i class="fas fa-circle text-red-500"></i>
+                    </div>
+                </button>
+
+                <button onclick="updateProjectStatus('مكتمل')"
+                        class="w-full text-right p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
+                    <div class="flex items-center justify-between">
+                        <span class="text-green-800">مكتمل</span>
+                        <i class="fas fa-circle text-green-500"></i>
+                    </div>
+                </button>
+            </div>
+
+            <div class="flex justify-end mt-6">
+                <button onclick="hideStatusModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                    إلغاء
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function showStatusModal() {
+    document.getElementById('statusModal').classList.remove('hidden');
+}
+
+function hideStatusModal() {
+    document.getElementById('statusModal').classList.add('hidden');
+}
+
+function updateProjectStatus(newStatus) {
+    fetch(`/admin/project/{{ project.id }}/status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        alert('حدث خطأ أثناء تحديث الحالة');
+    });
+
+    hideStatusModal();
+}
+
+// إغلاق النافذة المنبثقة عند النقر خارجها
+window.onclick = function(event) {
+    const modal = document.getElementById('statusModal');
+    if (event.target == modal) {
+        modal.classList.add('hidden');
+    }
+}
+</script>
+{% endblock %}

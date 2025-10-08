@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}إدارة العملاء - لوحة تحكم المصمم{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">إدارة العملاء</h1>
+            <p class="text-gray-600 mt-1">قائمة جميع العملاء مع معلوماتهم ومشاريعهم</p>
+        </div>
+        <div class="flex space-x-3 space-x-reverse">
+            <button class="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors">
+                <i class="fas fa-user-plus ml-2"></i>
+                إضافة عميل جديد
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- إحصائيات سريعة -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center">
+            <div class="p-3 bg-blue-100 rounded-lg">
+                <i class="fas fa-users text-blue-600 text-xl"></i>
+            </div>
+            <div class="mr-4">
+                <p class="text-sm font-medium text-gray-600">إجمالي العملاء</p>
+                <p class="text-2xl font-bold text-gray-900">{{ clients|length }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center">
+            <div class="p-3 bg-green-100 rounded-lg">
+                <i class="fas fa-user-check text-green-600 text-xl"></i>
+            </div>
+            <div class="mr-4">
+                <p class="text-sm font-medium text-gray-600">عملاء نشطون</p>
+                <p class="text-2xl font-bold text-gray-900">{{ clients|selectattr('is_active')|list|length }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center">
+            <div class="p-3 bg-purple-100 rounded-lg">
+                <i class="fas fa-star text-purple-600 text-xl"></i>
+            </div>
+            <div class="mr-4">
+                <p class="text-sm font-medium text-gray-600">عملاء VIP</p>
+                <p class="text-2xl font-bold text-gray-900">0</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center">
+            <div class="p-3 bg-orange-100 rounded-lg">
+                <i class="fas fa-calendar-plus text-orange-600 text-xl"></i>
+            </div>
+            <div class="mr-4">
+                <p class="text-sm font-medium text-gray-600">عملاء جدد (شهر)</p>
+                <p class="text-2xl font-bold text-gray-900">{{ clients|selectattr('created_at')|list|length }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- قائمة العملاء -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-100">
+    <div class="p-6 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold text-gray-900">قائمة العملاء</h2>
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <input type="text" placeholder="البحث عن عميل..."
+                       class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-6">
+        {% if clients %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for client in clients %}
+                <div class="bg-gray-50 rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="bg-primary text-white rounded-full h-12 w-12 flex items-center justify-center text-xl font-bold">
+                                {{ client.full_name[0] }}
+                            </div>
+                            <div class="mr-3">
+                                <h3 class="font-semibold text-gray-900">{{ client.full_name }}</h3>
+                                <p class="text-sm text-gray-600">@{{ client.username }}</p>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if client.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                            {% if client.is_active %}نشط{% else %}معطل{% endif %}
+                        </span>
+                    </div>
+
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-envelope ml-2 text-gray-400"></i>
+                            <span>{{ client.email }}</span>
+                        </div>
+                        {% if client.phone %}
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-phone ml-2 text-gray-400"></i>
+                            <span>{{ client.phone }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-calendar ml-2 text-gray-400"></i>
+                            <span>انضم في {{ client.created_at.strftime('%d/%m/%Y') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-200">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-sm text-gray-600">المشاريع:</span>
+                            <span class="font-semibold text-gray-900">{{ client.projects|length }}</span>
+                        </div>
+                        <a href="{{ url_for('view_client', client_id=client.id) }}"
+                           class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors text-center block">
+                            <i class="fas fa-eye ml-2"></i>
+                            عرض الملف الكامل
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-12">
+                <i class="fas fa-users text-gray-300 text-5xl mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">لا يوجد عملاء حالياً</h3>
+                <p class="text-gray-600">ابدأ بإضافة عملائك الأوائل</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

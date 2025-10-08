@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}مشاريعي - لوحة تحكم المصمم{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">مشاريعي</h1>
+            <p class="text-gray-600 mt-1">جميع مشاريعك مع تفاصيل شاملة</p>
+        </div>
+        <div class="flex space-x-3 space-x-reverse">
+            <a href="{{ url_for('new_project') }}" class="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors">
+                <i class="fas fa-plus ml-2"></i>
+                طلب مشروع جديد
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- فلاتر والبحث -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">البحث</label>
+            <input type="text" id="searchInput" placeholder="ابحث في المشاريع..."
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">الحالة</label>
+            <select id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                <option value="">جميع الحالات</option>
+                <option value="طلب جديد">طلب جديد</option>
+                <option value="قيد التنفيذ">قيد التنفيذ</option>
+                <option value="بانتظار المراجعة">بانتظار المراجعة</option>
+                <option value="مكتمل">مكتمل</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">الأولوية</label>
+            <select id="priorityFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                <option value="">جميع الأولويات</option>
+                <option value="منخفض">منخفض</option>
+                <option value="متوسط">متوسط</option>
+                <option value="عالي">عالي</option>
+                <option value="عاجل">عاجل</option>
+            </select>
+        </div>
+        <div class="flex items-end">
+            <button onclick="filterProjects()" class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors">
+                <i class="fas fa-search ml-2"></i>
+                فلترة
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- قائمة المشاريع -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-100">
+    <div class="p-6 border-b border-gray-100">
+        <h2 class="text-xl font-semibold text-gray-900">قائمة المشاريع</h2>
+    </div>
+    <div class="p-6">
+        {% if projects %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="projectsGrid">
+                {% for project in projects %}
+                <div class="bg-gray-50 rounded-lg p-6 hover:shadow-md transition-shadow project-card"
+                     data-status="{{ project.status }}"
+                     data-priority="{{ project.priority }}"
+                     data-title="{{ project.title }}">
+
+                    <!-- رأس البطاقة -->
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-1">{{ project.title }}</h3>
+                            <p class="text-sm text-gray-600">{{ project.description[:100] }}{% if project.description|length > 100 %}...{% endif %}</p>
+                        </div>
+                        <div class="mr-2">
+                            <a href="{{ url_for('view_project', project_id=project.id) }}"
+                               class="text-primary hover:text-primary-dark">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- شريط التقدم -->
+                    {% if project.status != 'طلب جديد' %}
+                    <div class="mb-4">
+                        <div class="flex justify-between text-sm text-gray-600 mb-1">
+                            <span>التقدم</span>
+                            <span>{{ project.progress }}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-primary h-2 rounded-full transition-all" style="width: {{ project.progress }}%"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- معلومات المشروع -->
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-600">الحالة:</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if project.status == 'طلب جديد' %}bg-blue-100 text-blue-800{% elif project.status == 'قيد التنفيذ' %}bg-orange-100 text-orange-800{% elif project.status == 'مكتمل' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ project.status }}
+                            </span>
+                        </div>
+
+                        {% if project.budget %}
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-600">الميزانية:</span>
+                            <span class="font-medium text-gray-900">{{ project.budget|number_format }} ريال</span>
+                        </div>
+                        {% endif %}
+
+                        {% if project.due_date %}
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-600">تاريخ التسليم:</span>
+                            <span class="{% if project.due_date < date.today() %}text-red-600{% elif (project.due_date - date.today()).days <= 3 %}text-orange-600{% else %}text-gray-900{% endif %}">
+                                {{ project.due_date.strftime('%d/%m/%Y') }}
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-600">تاريخ الإنشاء:</span>
+                            <span class="text-gray-900">{{ project.created_at.strftime('%d/%m/%Y') }}</span>
+                        </div>
+                    </div>
+
+                    <!-- زر رفع الملفات -->
+                    <div class="pt-4 border-t border-gray-200">
+                        <a href="{{ url_for('upload_file', project_id=project.id) }}"
+                           class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium transition-colors text-center block">
+                            <i class="fas fa-upload ml-2"></i>
+                            رفع ملفات
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-12">
+                <i class="fas fa-project-diagram text-gray-300 text-5xl mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">لا توجد مشاريع حالياً</h3>
+                <p class="text-gray-600 mb-6">ابدأ مشروعك الأول واطلب خدمات التصميم التي تحتاجها</p>
+                <a href="{{ url_for('new_project') }}"
+                   class="bg-primary text-white px-6 py-3 rounded-lg hover:opacity-90 transition-colors inline-flex items-center">
+                    <i class="fas fa-plus ml-2"></i>
+                    طلب مشروع جديد
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function filterProjects() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    const priorityFilter = document.getElementById('priorityFilter').value;
+
+    const projectCards = document.querySelectorAll('.project-card');
+
+    projectCards.forEach(card => {
+        const title = card.dataset.title.toLowerCase();
+        const status = card.dataset.status;
+        const priority = card.dataset.priority;
+
+        const matchesSearch = title.includes(searchTerm);
+        const matchesStatus = !statusFilter || status === statusFilter;
+        const matchesPriority = !priorityFilter || priority === priorityFilter;
+
+        if (matchesSearch && matchesStatus && matchesPriority) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// إضافة وظائف البحث الفوري
+document.getElementById('searchInput').addEventListener('input', filterProjects);
+document.getElementById('statusFilter').addEventListener('change', filterProjects);
+document.getElementById('priorityFilter').addEventListener('change', filterProjects);
+</script>
+{% endblock %}

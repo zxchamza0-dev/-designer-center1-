@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}طلب مشروع جديد - لوحة تحكم المصمم{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">طلب مشروع جديد</h1>
+            <p class="text-gray-600">املأ التفاصيل التالية لطلب مشروع تصميم جديد</p>
+        </div>
+
+        <form method="POST" class="space-y-8">
+            {{ form.hidden_tag() }}
+
+            <!-- معلومات أساسية -->
+            <div class="bg-gray-50 rounded-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">المعلومات الأساسية</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.title.id }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.title.label.text }} *
+                        </label>
+                        {{ form.title(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary") }}
+                        {% if form.title.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.title.errors[0] }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.budget.id }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.budget.label.text }}
+                        </label>
+                        <div class="relative">
+                            {{ form.budget(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary") }}
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500">ريال</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <label for="{{ form.description.id }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.description.label.text }}
+                    </label>
+                    {{ form.description(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary", rows=4, placeholder="صف مشروعك بالتفصيل...") }}
+                    {% if form.description.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.description.errors[0] }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- تفاصيل المشروع -->
+            <div class="bg-gray-50 rounded-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">تفاصيل المشروع</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.due_date.id }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.due_date.label.text }}
+                        </label>
+                        {{ form.due_date(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary") }}
+                        {% if form.due_date.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.due_date.errors[0] }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.priority.id }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.priority.label.text }}
+                        </label>
+                        {{ form.priority(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary") }}
+                        {% if form.priority.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.priority.errors[0] }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- متطلبات المشروع -->
+            <div class="bg-gray-50 rounded-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">متطلبات المشروع</h2>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary" name="requirements[]" value="logo">
+                            <span class="mr-2 text-sm text-gray-700">تصميم شعار</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary" name="requirements[]" value="branding">
+                            <span class="mr-2 text-sm text-gray-700">هوية بصرية</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary" name="requirements[]" value="website">
+                            <span class="mr-2 text-sm text-gray-700">تصميم موقع إلكتروني</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary" name="requirements[]" value="mobile">
+                            <span class="mr-2 text-sm text-gray-700">تطبيق جوال</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary" name="requirements[]" value="print">
+                            <span class="mr-2 text-sm text-gray-700">مواد مطبوعة</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary" name="requirements[]" value="social">
+                            <span class="mr-2 text-sm text-gray-700">تصميم وسائل التواصل</span>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">متطلبات إضافية</label>
+                        <textarea name="additional_requirements" rows="3"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                  placeholder="أي متطلبات خاصة أخرى..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- مرفقات -->
+            <div class="bg-gray-50 rounded-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">المرفقات</h2>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-4"></i>
+                    <p class="text-gray-600 mb-4">اسحب الملفات هنا أو انقر للاختيار</p>
+                    <input type="file" multiple class="hidden" id="fileUpload" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                    <label for="fileUpload" class="bg-primary text-white px-6 py-2 rounded-lg hover:opacity-90 transition-colors cursor-pointer">
+                        اختيار الملفات
+                    </label>
+                    <p class="text-xs text-gray-500 mt-2">PDF, DOC, JPG, PNG حتى 10MB</p>
+                </div>
+            </div>
+
+            <!-- أزرار الإجراءات -->
+            <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+                <a href="{{ url_for('client_projects') }}"
+                   class="text-gray-600 hover:text-gray-800 transition-colors">
+                    <i class="fas fa-arrow-right ml-2"></i>
+                    العودة إلى المشاريع
+                </a>
+
+                <div class="space-x-3 space-x-reverse">
+                    <button type="button" onclick="saveDraft()"
+                            class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        حفظ كمسودة
+                    </button>
+                    <button type="submit"
+                            class="px-6 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors">
+                        <i class="fas fa-paper-plane ml-2"></i>
+                        إرسال الطلب
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function saveDraft() {
+    // حفظ البيانات في localStorage
+    const formData = new FormData(document.querySelector('form'));
+    const draftData = {};
+    for (let [key, value] of formData.entries()) {
+        if (key !== 'csrf_token') {
+            draftData[key] = value;
+        }
+    }
+    localStorage.setItem('projectDraft', JSON.stringify(draftData));
+
+    // إظهار رسالة نجاح
+    showAlert('تم حفظ المسودة بنجاح', 'success');
+}
+
+function showAlert(message, type = 'info') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+        type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' :
+        type === 'error' ? 'bg-red-100 text-red-800 border border-red-200' :
+        'bg-blue-100 text-blue-800 border border-blue-200'
+    }`;
+    alertDiv.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} ml-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+
+    document.body.appendChild(alertDiv);
+
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 3000);
+}
+
+// تحميل المسودة إذا كانت موجودة
+document.addEventListener('DOMContentLoaded', function() {
+    const draft = localStorage.getItem('projectDraft');
+    if (draft) {
+        const draftData = JSON.parse(draft);
+        Object.keys(draftData).forEach(key => {
+            const element = document.querySelector(`[name="${key}"]`);
+            if (element) {
+                element.value = draftData[key];
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

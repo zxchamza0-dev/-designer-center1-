@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة مهمة - {{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+        <div class="mb-8">
+            <div class="flex items-center mb-4">
+                <a href="{{ url_for('view_project', project_id=project.id) }}" class="text-primary hover:text-primary-dark ml-2">
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+                <h1 class="text-2xl font-bold text-gray-900">إضافة مهمة جديدة</h1>
+            </div>
+            <p class="text-gray-600">إضافة مهمة لمشروع: <strong>{{ project.title }}</strong></p>
+        </div>
+
+        <form method="POST" class="space-y-6">
+            {{ form.hidden_tag() }}
+
+            <div>
+                <label for="{{ form.title.id }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.title.label.text }} *
+                </label>
+                {{ form.title(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary") }}
+                {% if form.title.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.title.errors[0] }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.description.id }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.description.label.text }}
+                </label>
+                {{ form.description(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary", rows=4) }}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="{{ form.priority.id }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.priority.label.text }}
+                    </label>
+                    {{ form.priority(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary") }}
+                </div>
+
+                <div>
+                    <label for="{{ form.due_date.id }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.due_date.label.text }}
+                    </label>
+                    {{ form.due_date(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary") }}
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 space-x-reverse pt-6 border-t border-gray-200">
+                <a href="{{ url_for('view_project', project_id=project.id) }}"
+                   class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    إلغاء
+                </a>
+                <button type="submit"
+                        class="px-6 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors">
+                    <i class="fas fa-plus ml-2"></i>
+                    إضافة المهمة
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

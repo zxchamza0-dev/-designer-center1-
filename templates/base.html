@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}لوحة تحكم المصمم{% endblock %}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* تخصيص الألوان للنظام */
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #6366f1;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+        }
+
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* تخصيص أنماط الخط العربي */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* تخصيص شريط التمرير */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- شريط التنقل العلوي -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- الشعار والعنوان -->
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-gradient">
+                            <i class="fas fa-palette ml-2"></i>
+                            لوحة تحكم المصمم
+                        </h1>
+                    </div>
+                </div>
+
+                <!-- قائمة التنقل -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4 space-x-reverse">
+                        {% if current_user.is_authenticated %}
+                            {% if current_user.user_type == 'admin' %}
+                                <a href="{{ url_for('admin_dashboard') }}" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors {% if request.endpoint == 'admin_dashboard' %}bg-primary text-white{% endif %}">
+                                    <i class="fas fa-tachometer-alt ml-1"></i>
+                                    لوحة التحكم
+                                </a>
+                                <a href="{{ url_for('admin_projects') }}" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors {% if request.endpoint == 'admin_projects' %}bg-primary text-white{% endif %}">
+                                    <i class="fas fa-project-diagram ml-1"></i>
+                                    إدارة المشاريع
+                                </a>
+                                <a href="{{ url_for('admin_clients') }}" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors {% if request.endpoint == 'admin_clients' %}bg-primary text-white{% endif %}">
+                                    <i class="fas fa-users ml-1"></i>
+                                    العملاء
+                                </a>
+                                <a href="{{ url_for('admin_expenses') }}" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors {% if request.endpoint == 'admin_expenses' %}bg-primary text-white{% endif %}">
+                                    <i class="fas fa-money-bill-wave ml-1"></i>
+                                    المصروفات
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('client_dashboard') }}" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors {% if request.endpoint == 'client_dashboard' %}bg-primary text-white{% endif %}">
+                                    <i class="fas fa-tachometer-alt ml-1"></i>
+                                    لوحة التحكم
+                                </a>
+                                <a href="{{ url_for('client_projects') }}" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors {% if request.endpoint == 'client_projects' %}bg-primary text-white{% endif %}">
+                                    <i class="fas fa-project-diagram ml-1"></i>
+                                    مشاريعي
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- قائمة المستخدم -->
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    {% if current_user.is_authenticated %}
+                        <!-- إشعارات -->
+                        <div class="relative">
+                            <button class="text-gray-500 hover:text-gray-700 p-2">
+                                <i class="fas fa-bell"></i>
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                            </button>
+                        </div>
+
+                        <!-- قائمة المستخدم المنسدلة -->
+                        <div class="relative">
+                            <button id="user-menu" class="flex items-center space-x-2 space-x-reverse text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                <div class="bg-primary text-white rounded-full h-8 w-8 flex items-center justify-center">
+                                    {{ current_user.full_name[0] }}
+                                </div>
+                                <span class="text-gray-700">{{ current_user.full_name }}</span>
+                                <i class="fas fa-chevron-down text-gray-400"></i>
+                            </button>
+
+                            <!-- محتوى القائمة المنسدلة -->
+                            <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-user ml-2"></i>
+                                    الملف الشخصي
+                                </a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-cog ml-2"></i>
+                                    الإعدادات
+                                </a>
+                                <div class="border-t border-gray-100"></div>
+                                <a href="{{ url_for('logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-sign-out-alt ml-2"></i>
+                                    تسجيل الخروج
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- شريط جانبي للجوال -->
+    {% if current_user.is_authenticated %}
+    <div class="md:hidden">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-b">
+            {% if current_user.user_type == 'admin' %}
+                <a href="{{ url_for('admin_dashboard') }}" class="text-gray-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-tachometer-alt ml-1"></i>
+                    لوحة التحكم
+                </a>
+                <a href="{{ url_for('admin_projects') }}" class="text-gray-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-project-diagram ml-1"></i>
+                    إدارة المشاريع
+                </a>
+                <a href="{{ url_for('admin_clients') }}" class="text-gray-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-users ml-1"></i>
+                    العملاء
+                </a>
+                <a href="{{ url_for('admin_expenses') }}" class="text-gray-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-money-bill-wave ml-1"></i>
+                    المصروفات
+                </a>
+            {% else %}
+                <a href="{{ url_for('client_dashboard') }}" class="text-gray-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-tachometer-alt ml-1"></i>
+                    لوحة التحكم
+                </a>
+                <a href="{{ url_for('client_projects') }}" class="text-gray-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-project-diagram ml-1"></i>
+                    مشاريعي
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- المحتوى الرئيسي -->
+    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- رسائل الفلاش -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-4 p-4 rounded-md {% if category == 'error' %}bg-red-50 border border-red-200 text-red-700{% elif category == 'success' %}bg-green-50 border border-green-200 text-green-700{% elif category == 'warning' %}bg-yellow-50 border border-yellow-200 text-yellow-700{% else %}bg-blue-50 border border-blue-200 text-blue-700{% endif %}">
+                        <div class="flex">
+                            <i class="fas {% if category == 'error' %}fa-exclamation-circle{% elif category == 'success' %}fa-check-circle{% elif category == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} ml-3"></i>
+                            <div>{{ message }}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-sm text-gray-500">
+                <p>&copy; 2024 لوحة تحكم المصمم. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript للتفاعلات -->
+    <script>
+        // إظهار/إخفاء القائمة المنسدلة للمستخدم
+        document.getElementById('user-menu')?.addEventListener('click', function() {
+            const dropdown = document.getElementById('user-dropdown');
+            dropdown.classList.toggle('hidden');
+        });
+
+        // إغلاق القائمة المنسدلة عند النقر خارجها
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('user-menu');
+            const userDropdown = document.getElementById('user-dropdown');
+
+            if (userMenu && userDropdown && !userMenu.contains(event.target) && !userDropdown.contains(event.target)) {
+                userDropdown.classList.add('hidden');
+            }
+        });
+
+        // تأكيد حذف العناصر
+        function confirmDelete(message = 'هل أنت متأكد من الحذف؟') {
+            return confirm(message);
+        }
+
+        // تحديث حالة المشروع عبر AJAX
+        function updateProjectStatus(projectId, newStatus) {
+            fetch(`/admin/project/${projectId}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                alert('حدث خطأ أثناء تحديث الحالة');
+            });
+        }
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

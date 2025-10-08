@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة سجل وقت - {{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+        <div class="mb-8">
+            <div class="flex items-center mb-4">
+                <a href="{{ url_for('view_project', project_id=project.id) }}" class="text-primary hover:text-primary-dark ml-2">
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+                <h1 class="text-2xl font-bold text-gray-900">إضافة سجل وقت العمل</h1>
+            </div>
+            <p class="text-gray-600">تسجيل ساعات العمل لمشروع: <strong>{{ project.title }}</strong></p>
+        </div>
+
+        <form method="POST" class="space-y-6">
+            {{ form.hidden_tag() }}
+
+            <div>
+                <label for="{{ form.description.id }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.description.label.text }}
+                </label>
+                {{ form.description(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary", placeholder="وصف العمل المنجز...") }}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="{{ form.hours.id }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.hours.label.text }} *
+                    </label>
+                    <div class="relative">
+                        {{ form.hours(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary") }}
+                        <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500 text-sm">ساعة</span>
+                        </div>
+                    </div>
+                    {% if form.hours.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.hours.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.date.id }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.date.label.text }}
+                    </label>
+                    {{ form.date(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary") }}
+                </div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-blue-600 mt-1 ml-2"></i>
+                    <div class="text-sm text-blue-800">
+                        <p class="font-medium mb-1">نصيحة:</p>
+                        <p>سجل ساعات العمل بدقة لتتبع الوقت المستغرق في كل مشروع وحساب التكاليف بشكل صحيح.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 space-x-reverse pt-6 border-t border-gray-200">
+                <a href="{{ url_for('view_project', project_id=project.id) }}"
+                   class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    إلغاء
+                </a>
+                <button type="submit"
+                        class="px-6 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors">
+                    <i class="fas fa-clock ml-2"></i>
+                    إضافة السجل
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

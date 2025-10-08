@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}رفع الملفات - {{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+        <div class="mb-8">
+            <div class="flex items-center mb-4">
+                <a href="{{ url_for('view_project', project_id=project.id) }}" class="text-primary hover:text-primary-dark ml-2">
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+                <h1 class="text-2xl font-bold text-gray-900">رفع الملفات</h1>
+            </div>
+            <p class="text-gray-600">رفع الملفات المتعلقة بمشروع: <strong>{{ project.title }}</strong></p>
+        </div>
+
+        <!-- منطقة السحب والإفلات -->
+        <div class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center mb-8 hover:border-primary transition-colors"
+             ondrop="dropHandler(event);"
+             ondragover="dragOverHandler(event);"
+             ondragenter="dragEnterHandler(event);"
+             ondragleave="dragLeaveHandler(event);">
+
+            <div id="uploadArea">
+                <i class="fas fa-cloud-upload-alt text-gray-400 text-5xl mb-6"></i>
+                <h3 class="text-xl font-medium text-gray-900 mb-2">اسحب الملفات هنا</h3>
+                <p class="text-gray-600 mb-6">أو انقر لاختيار الملفات من جهازك</p>
+
+                <input type="file" multiple id="fileInput" class="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.psd,.ai,.zip">
+                <label for="fileInput"
+                       class="bg-primary text-white px-6 py-3 rounded-lg hover:opacity-90 transition-colors cursor-pointer inline-flex items-center">
+                    <i class="fas fa-folder-open ml-2"></i>
+                    اختيار الملفات
+                </label>
+
+                <p class="text-xs text-gray-500 mt-4">
+                    يُسمح بالملفات: PDF, DOC, JPG, PNG, GIF, PSD, AI, ZIP<br>
+                    الحد الأقصى لحجم الملف: 10MB
+                </p>
+            </div>
+
+            <!-- منطقة التقدم أثناء الرفع -->
+            <div id="uploadProgress" class="hidden mt-6">
+                <div class="flex items-center justify-center mb-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    <span class="mr-3 text-gray-700">جاري الرفع...</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progressBar" class="bg-primary h-2 rounded-full transition-all" style="width: 0%"></div>
+                </div>
+                <p id="progressText" class="text-sm text-gray-600 mt-2">0%</p>
+            </div>
+        </div>
+
+        <!-- قائمة الملفات المرفوعة مسبقاً -->
+        {% if project.files %}
+        <div class="border-t border-gray-200 pt-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">الملفات المرفوعة سابقاً</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for file in project.files %}
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center flex-1">
+                        <i class="fas fa-file text-gray-400 ml-3"></i>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900">{{ file.original_filename }}</p>
+                            <p class="text-xs text-gray-500">{{ file.file_size|filesizeformat }} • {{ file.uploaded_at.strftime('%d/%m/%Y %I:%M %p') }}</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2 space-x-reverse">
+                        <a href="{{ url_for('download_file', file_id=file.id) }}"
+                           class="text-primary hover:text-primary-dark">
+                            <i class="fas fa-download"></i>
+                        </a>
+                        <button onclick="deleteFile({{ file.id }})" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- نصائح للرفع -->
+        <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <h3 class="font-medium text-blue-900 mb-2">
+                <i class="fas fa-info-circle ml-2"></i>
+                نصائح لرفع الملفات
+            </h3>
+            <ul class="text-sm text-blue-800 space-y-1">
+                <li>• تأكد من أن الملفات بالتنسيقات المدعومة</li>
+                <li>• استخدم أسماء واضحة للملفات توضح محتواها</li>
+                <li>• إذا كان الملف كبيراً، قم بضغطه في ملف ZIP</li>
+                <li>• يمكنك رفع عدة ملفات في نفس الوقت</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedFiles = [];
+
+function dragOverHandler(ev) {
+    ev.preventDefault();
+    ev.currentTarget.classList.add('border-primary', 'bg-primary', 'bg-opacity-5');
+}
+
+function dragEnterHandler(ev) {
+    ev.preventDefault();
+}
+
+function dragLeaveHandler(ev) {
+    ev.currentTarget.classList.remove('border-primary', 'bg-primary', 'bg-opacity-5');
+}
+
+function dropHandler(ev) {
+    ev.preventDefault();
+    ev.currentTarget.classList.remove('border-primary', 'bg-primary', 'bg-opacity-5');
+
+    const files = Array.from(ev.dataTransfer.files);
+    handleFiles(files);
+}
+
+function handleFiles(files) {
+    selectedFiles = files.filter(file => {
+        const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png', 'image/gif', 'application/x-photoshop', 'application/illustrator', 'application/zip'];
+        return allowedTypes.includes(file.type) || file.name.match(/\.(pdf|doc|docx|jpg|jpeg|png|gif|psd|ai|zip)$/i);
+    });
+
+    if (selectedFiles.length > 0) {
+        uploadFiles();
+    } else {
+        alert('يرجى اختيار ملفات بالتنسيقات المدعومة فقط');
+    }
+}
+
+// معالجة اختيار الملفات
+document.getElementById('fileInput').addEventListener('change', function(e) {
+    handleFiles(Array.from(e.target.files));
+});
+
+function uploadFiles() {
+    if (selectedFiles.length === 0) return;
+
+    const uploadArea = document.getElementById('uploadArea');
+    const uploadProgress = document.getElementById('uploadProgress');
+
+    uploadArea.classList.add('hidden');
+    uploadProgress.classList.remove('hidden');
+
+    const formData = new FormData();
+    selectedFiles.forEach(file => {
+        formData.append('files[]', file);
+    });
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/project/{{ project.id }}/upload');
+
+    xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            document.getElementById('progressBar').style.width = percentComplete + '%';
+            document.getElementById('progressText').textContent = Math.round(percentComplete) + '%';
+        }
+    };
+
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            location.reload();
+        } else {
+            alert('حدث خطأ أثناء رفع الملفات');
+            uploadProgress.classList.add('hidden');
+            uploadArea.classList.remove('hidden');
+        }
+    };
+
+    xhr.send(formData);
+}
+
+function deleteFile(fileId) {
+    if (confirm('هل أنت متأكد من حذف هذا الملف؟')) {
+        fetch(`/file/${fileId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            alert('حدث خطأ أثناء حذف الملف');
+        });
+    }
+}
+
+// إعادة تعيين منطقة الرفع عند النقر عليها
+document.querySelector('[ondrop]').addEventListener('click', function() {
+    document.getElementById('fileInput').click();
+});
+</script>
+{% endblock %}

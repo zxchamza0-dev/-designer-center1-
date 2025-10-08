@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}تسجيل الدخول - لوحة تحكم المصمم{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-primary py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <div class="mx-auto h-20 w-20 bg-white rounded-full flex items-center justify-center mb-8">
+                <i class="fas fa-palette text-4xl text-primary"></i>
+            </div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-white">
+                تسجيل الدخول إلى حسابك
+            </h2>
+            <p class="mt-2 text-center text-sm text-indigo-100">
+                أو
+                <a href="{{ url_for('register') }}" class="font-medium text-white hover:text-indigo-200 transition-colors">
+                    إنشاء حساب جديد
+                </a>
+            </p>
+        </div>
+
+        <form class="mt-8 space-y-6" method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="bg-white p-8 rounded-xl shadow-2xl">
+                <div class="space-y-6">
+                    <div>
+                        <label for="{{ form.email.id }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.email.label.text }}
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <i class="fas fa-envelope text-gray-400"></i>
+                            </div>
+                            {{ form.email(class="appearance-none rounded-lg relative block w-full px-3 py-3 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary focus:z-10 sm:text-sm") }}
+                        </div>
+                        {% if form.email.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.email.errors[0] }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.password.id }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.password.label.text }}
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                            {{ form.password(class="appearance-none rounded-lg relative block w-full px-3 py-3 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary focus:z-10 sm:text-sm") }}
+                        </div>
+                        {% if form.password.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.password.errors[0] }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            {{ form.remember(class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded") }}
+                            <label for="{{ form.remember.id }}" class="ml-2 block text-sm text-gray-900">
+                                {{ form.remember.label.text }}
+                            </label>
+                        </div>
+
+                        <div class="text-sm">
+                            <a href="#" class="font-medium text-primary hover:text-primary-dark transition-colors">
+                                نسيت كلمة المرور؟
+                            </a>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all transform hover:scale-105">
+                            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                                <i class="fas fa-sign-in-alt text-primary-light group-hover:text-primary"></i>
+                            </span>
+                            تسجيل الدخول
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بيانات تجريبية -->
+            <div class="mt-6 bg-white bg-opacity-10 rounded-lg p-4">
+                <h3 class="text-white text-sm font-medium mb-2">بيانات تجريبية للاختبار:</h3>
+                <div class="text-xs text-indigo-100 space-y-1">
+                    <p><strong>مسؤول:</strong> admin@designer.com / 123456</p>
+                    <p><strong>عميل:</strong> client@alnoor.com / 123456</p>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
